@@ -2,29 +2,16 @@
   "name": "bmc-demo",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
+  "description": "Demo: Strapi 5 como CMS headless con un front-end React que consume su API",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "dev": "npm run dev:cms & npm run dev:web",
+    "dev:cms": "npm --prefix apps/cms run develop",
+    "dev:web": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/cms run build && npm --prefix apps/web run build",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "setup": "npm --prefix apps/cms install && npm --prefix apps/web install"
   },
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.564.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "tailwind-merge": "^3.3.1"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.0",
-    "@types/node": "^22.10.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "postcss": "^8.5.0",
-    "tailwindcss": "^4.2.0",
-    "typescript": "~5.7.3",
-    "vite": "^6.0.0"
+  "engines": {
+    "node": ">=22"
   }
 }

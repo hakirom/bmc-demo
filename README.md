@@ -1,64 +1,97 @@
-# DEMO — Bolsa Mercantil de Colombia
+# BMC Demo — Strapi 5 + React
 
-Réplica **no oficial** de la home de [bolsamercantil.com.co](https://www.bolsamercantil.com.co/),
-construida como demostración de diseño e ingeniería front-end.
+Implementación de **[Strapi](https://strapi.io/) 5** como CMS headless, con un front-end
+React que consume su API REST. El contenido de ejemplo modela el sitio de la Bolsa
+Mercantil de Colombia.
 
-> ⚠️ Esto **no es** el sitio de la Bolsa Mercantil de Colombia S.A. No está afiliado ni
-> respaldado por la BMC. Las cifras del tablero de mercado son **simuladas** y no
-> corresponden a operaciones reales. El sitio lleva un badge visible de DEMO,
-> `robots: noindex` y no debe desplegarse en un dominio público.
+> ⚠️ **Demo no oficial.** No está afiliada ni respaldada por la Bolsa Mercantil de
+> Colombia S.A. Las operaciones de mercado son datos simulados. El front-end lleva un
+> aviso visible y `robots: noindex`.
 
-## Stack
+```
+apps/
+├── cms/   Strapi 5.52 (TypeScript, SQLite) — API + panel de administración
+└── web/   Vite 6 + React 19 + Tailwind v4 — consume la API del CMS
+```
 
-- Vite 6 + React 19 + TypeScript (strict)
-- Tailwind CSS v4 (tokens de marca en `src/styles/globals.css`)
-- lucide-react para iconografía
-- Sin dependencias de datos: todo el contenido vive en `src/data/site.ts`
+## Arranque
+
+```bash
+npm run setup
+```
+
+Luego, en dos terminales (o `npm run dev`, que levanta ambos):
+
+```bash
+npm run dev:cms   # http://localhost:1337/admin
+```
+
+```bash
+npm run dev:web   # http://localhost:5173
+```
+
+**Primer arranque:** abre http://localhost:1337/admin y crea tu usuario administrador
+(Strapi lo pide una sola vez; nadie más puede crearlo por ti). El contenido de ejemplo
+y los permisos públicos ya quedaron cargados por el seed automático.
+
+## Cómo encaja todo
+
+1. Al arrancar, `apps/cms/src/index.ts` ejecuta `src/seed/`, que:
+   - habilita `find`/`findOne` para el rol **Public** en los cinco content-types, y
+   - carga el contenido inicial **solo si la colección está vacía** (idempotente).
+2. El front-end pide todo en paralelo desde `apps/web/src/lib/cms.ts` y lo mapea a las
+   mismas formas que el contenido local.
+3. Si Strapi no responde, `ContentProvider` cae al contenido de `src/data/site.ts` y el
+   badge inferior izquierdo cambia a *"CMS no disponible — contenido local"*. La página
+   nunca se rompe por el backend.
+
+## Modelo de contenido
+
+| Content-type | Tipo | Endpoint | Qué alimenta |
+|---|---|---|---|
+| `Home` | single | `/api/home?populate=*` | Hero, títulos de sección, cifras, mensajes de valor y tarjetas de contacto |
+| `Plataforma` | colección | `/api/plataformas?sort=orden:asc` | Carrusel de plataformas del hero |
+| `Servicio` | colección | `/api/servicios?populate=enlaces` | Sección *Nuestros servicios* |
+| `Operación de mercado` | colección | `/api/operaciones-mercado` | Tablero de cierre (físicos / financieros) |
+| `Boletín` | colección | `/api/boletines?sort=fecha:desc` | Sección *Boletines del mercado* |
+
+Componentes reutilizables en `apps/cms/src/components/`: `shared.enlace`, `shared.seo`,
+`home.cifra`, `home.mensaje-valor`, `home.tarjeta-contacto`.
+
+`Draft & Publish` está activo en todo salvo en *Operación de mercado*, que son datos y no
+contenido editorial.
+
+## Probar el circuito completo
+
+1. Entra al panel → **Content Manager → Home** y cambia el título.
+2. Pulsa **Save** y luego **Publish**.
+3. Recarga http://localhost:5173 — el hero muestra el texto nuevo.
+
+Para comprobar el fallback: detén el CMS y recarga el front; sigue funcionando con el
+contenido local.
 
 ## Comandos
 
-```bash
-npm install
-npm run dev        # http://localhost:5173
-npm run typecheck
-npm run build      # tsc --noEmit && vite build → dist/
-npm run preview
-```
+| Comando | Qué hace |
+|---|---|
+| `npm run setup` | Instala dependencias de ambas apps |
+| `npm run dev` | Levanta CMS y front a la vez |
+| `npm run dev:cms` / `npm run dev:web` | Cada uno por separado |
+| `npm run build` | Build de producción de ambos |
+| `npm run typecheck` | TypeScript del front |
 
-## Estructura
+## Configuración
 
-```
-src/
-├── data/site.ts              # TODO el copy y los datos simulados
-├── lib/
-│   ├── utils.ts              # cn()
-│   └── use-reveal.ts         # animación de entrada con IntersectionObserver
-├── components/
-│   ├── top-bar.tsx           # barra de utilidades + selector Esp/Ing
-│   ├── navbar.tsx            # logo, Acceso, buscador y mega menú
-│   ├── hero.tsx              # hero + carrusel de plataformas
-│   ├── market-board.tsx      # cierre de rueda + tablero físicos/financieros
-│   ├── services.tsx          # NUESTROS SERVICIOS (4 bloques)
-│   ├── stats-strip.tsx       # franja de cifras
-│   ├── value-carousel.tsx    # ¿Cómo agregamos valor a Colombia?
-│   ├── contact-section.tsx   # CONTÁCTENOS
-│   ├── site-footer.tsx       # footer, certificaciones y legal
-│   ├── bmc-logo.tsx          # marca dibujada en SVG (sin assets de terceros)
-│   ├── icon.tsx              # mapa de iconos
-│   ├── section-heading.tsx   # encabezado reutilizable
-│   ├── whatsapp-fab.tsx      # botón flotante de contacto
-│   └── demo-badge.tsx        # aviso de réplica no oficial
-└── styles/globals.css        # paleta BMC (#013365 / #1E88D3) y utilidades
-```
+- **Base de datos:** SQLite en `apps/cms/.tmp/data.db` (no versionada). Para Postgres,
+  cambia `DATABASE_CLIENT` y las credenciales en `apps/cms/.env`.
+- **URL del CMS para el front:** `VITE_CMS_URL` en `apps/web/.env` (por defecto
+  `http://localhost:1337`).
+- **Desactivar el seed:** `SEED_DISABLED=true` en `apps/cms/.env`.
+- Los `.env` no se versionan; cada app tiene su `.env.example`.
 
-## Cambiar el contenido
+## Siguientes pasos naturales
 
-Todo el texto está centralizado en `src/data/site.ts`. Editar ahí basta: los
-componentes no llevan copy hard-codeado.
-
-## Notas de fidelidad
-
-- Los logos, tipografías e imágenes propietarias **no** se descargaron del sitio
-  original. La marca BMC está redibujada en SVG y la tipografía es Source Sans 3.
-- La estructura y los textos institucionales reproducen la home pública
-  (capturada el 2026-08-19) para que la comparación visual sea útil.
+- Activar **i18n** (es/en) para el toggle Esp/Ing del header.
+- Subir PDFs reales a los boletines con el campo `adjunto` (Media Library).
+- Cambiar SQLite por Postgres y desplegar (Strapi Cloud o self-host).
+- Generar tipos del cliente a partir de `apps/cms/types/generated`.
