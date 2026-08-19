@@ -9,9 +9,11 @@
     "dev:web": "npm --prefix apps/web run dev",
     "build": "npm --prefix apps/cms run build && npm --prefix apps/web run build",
     "typecheck": "npm --prefix apps/web run typecheck",
-    "setup": "npm --prefix apps/cms install && npm --prefix apps/web install"
+    "setup": "npm --prefix apps/cms install && npm --prefix apps/web install",
+    "build:web": "npm --prefix apps/web run build",
+    "build:cms": "npm --prefix apps/cms run build"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   }
 }

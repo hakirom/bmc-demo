@@ -158,6 +158,41 @@ contenido local.
 - **Desactivar el seed:** `SEED_DISABLED=true` en `apps/cms/.env`.
 - Los `.env` no se versionan; cada app tiene su `.env.example`.
 
+## Despliegue
+
+### El front en Vercel
+
+El `vercel.json` de la raíz ya deja el proyecto listo: instala y compila solo
+`apps/web`, publica `apps/web/dist` y reescribe todas las rutas a `index.html` (necesario
+para que `/acceso`, `/portal` y `/pqrsf` funcionen al recargar).
+
+En **Settings → Environment Variables** define:
+
+```
+VITE_CMS_URL = https://tu-cms-publico
+```
+
+Vite incrusta esa variable **en tiempo de compilación**, así que hay que volver a
+desplegar después de cambiarla. Si falta, el front apunta a `localhost:1337`, no
+encuentra el CMS y cae al contenido local: la portada se ve, pero el portal aparece
+vacío y el asistente no puede radicar.
+
+### El CMS no va en Vercel
+
+Strapi es un servidor Node persistente con base de datos; Vercel ejecuta funciones
+efímeras con el disco en solo lectura, así que el SQLite se perdería entre invocaciones.
+Opciones que sí funcionan:
+
+| Dónde | Notas |
+|---|---|
+| **Strapi Cloud** | Camino oficial: Postgres, CDN y correo incluidos |
+| **Render / Railway / Fly.io** | Contenedor Node + Postgres gestionado |
+| **VPS propio** | Docker o PM2 detrás de Nginx |
+
+En cualquiera de ellos hay que cambiar `DATABASE_CLIENT` a `postgres` en `apps/cms/.env`
+(SQLite no sirve con disco efímero) y añadir el dominio del front a la configuración de
+CORS en `apps/cms/config/middlewares.ts`.
+
 ## Qué no viene del CMS (a propósito)
 
 - El widget *Mis trámites* del portal usa datos de ejemplo fijos: representan registros
