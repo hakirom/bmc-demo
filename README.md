@@ -45,6 +45,13 @@ y los permisos públicos ya quedaron cargados por el seed automático.
    badge inferior izquierdo cambia a *"CMS no disponible — contenido local"*. La página
    nunca se rompe por el backend.
 
+## Panel de administración con la marca BMC
+
+El admin de Strapi está personalizado con la línea gráfica del sitio: navy `#013365`
+para acciones, azul `#1E88D3` para estados activos, fondos con el tinte `#F2F9FE`,
+logos propios en login y menú, favicon y textos en español. Detalles y tokens en
+[`apps/cms/README.md`](apps/cms/README.md).
+
 ## Modelo de contenido
 
 | Content-type | Tipo | Endpoint | Qué alimenta |
