@@ -61,9 +61,32 @@ logos propios en login y menú, favicon y textos en español. Detalles y tokens 
 | `Servicio` | colección | `/api/servicios?populate=enlaces` | Sección *Nuestros servicios* |
 | `Operación de mercado` | colección | `/api/operaciones-mercado` | Tablero de cierre (físicos / financieros) |
 | `Boletín` | colección | `/api/boletines?sort=fecha:desc` | Sección *Boletines del mercado* |
+| `Configuración del sitio` | single | `/api/configuracion-sitio` | Barra de utilidades, mega menú, footer, certificaciones y legales |
 
 Componentes reutilizables en `apps/cms/src/components/`: `shared.enlace`, `shared.seo`,
-`home.cifra`, `home.mensaje-valor`, `home.tarjeta-contacto`.
+`shared.certificacion`, `nav.columna`, `home.cifra`, `home.mensaje-valor`,
+`home.tarjeta-contacto`.
+
+### Bilingüe (es/en)
+
+i18n está activo en Plataforma, Servicio, Boletín, Home y Configuración del sitio. El
+español es el idioma por defecto. Algunos campos son **compartidos** a propósito —
+`orden`, `icono`, la fecha y la categoría de los boletines, las certificaciones y las
+redes sociales—: se editan una vez y valen para ambos idiomas.
+
+El selector **Esp/Ing** de la barra superior del front cambia el idioma de verdad: pide
+`?locale=` a la API y recarga hero, menú, tablero, boletines y pie de página. Números y
+fechas se formatean según el idioma (`es-CO` / `en-US`).
+
+El microcopy que no es contenido editorial (cabeceras de tabla, «Conocer más», etiquetas
+ARIA) vive en `apps/web/src/data/ui.ts`, no en el CMS.
+
+### Panel preparado para editores
+
+`apps/cms/src/seed/admin-views.ts` deja configuradas las vistas del Content Manager:
+columnas de listado, orden por defecto, editor agrupado por bloques y un texto de ayuda
+bajo cada campo importante. Se aplica al arrancar, lee lo que ya existe y solo escribe si
+hay cambios, de modo que respeta lo que se ajuste a mano desde «Configurar la vista».
 
 `Draft & Publish` está activo en todo salvo en *Operación de mercado*, que son datos y no
 contenido editorial.
@@ -73,6 +96,12 @@ contenido editorial.
 1. Entra al panel → **Content Manager → Home** y cambia el título.
 2. Pulsa **Save** y luego **Publish**.
 3. Recarga http://localhost:5173 — el hero muestra el texto nuevo.
+
+Y el circuito bilingüe:
+
+1. En **Home**, cambia el idioma del documento a *English* (selector arriba a la derecha).
+2. Edita el titular, guarda y publica.
+3. En el front, pon el selector en **Ing**: solo cambia esa versión; el español queda igual.
 
 Para comprobar el fallback: detén el CMS y recarga el front; sigue funcionando con el
 contenido local.
@@ -98,7 +127,7 @@ contenido local.
 
 ## Siguientes pasos naturales
 
-- Activar **i18n** (es/en) para el toggle Esp/Ing del header.
 - Subir PDFs reales a los boletines con el campo `adjunto` (Media Library).
+- Emitir un **API token** de solo lectura y dejar de depender del rol Public abierto.
 - Cambiar SQLite por Postgres y desplegar (Strapi Cloud o self-host).
 - Generar tipos del cliente a partir de `apps/cms/types/generated`.
