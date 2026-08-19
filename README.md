@@ -62,6 +62,9 @@ logos propios en login y menú, favicon y textos en español. Detalles y tokens 
 | `Operación de mercado` | colección | `/api/operaciones-mercado` | Tablero de cierre (físicos / financieros) |
 | `Boletín` | colección | `/api/boletines?sort=fecha:desc` | Sección *Boletines del mercado* |
 | `Configuración del sitio` | single | `/api/configuracion-sitio` | Barra de utilidades, mega menú, footer, certificaciones y legales |
+| `Textos de interfaz` | single | `/api/textos-interfaz` | Microcopy: botones, cabeceras de tabla, acceso, portal y guion del asistente |
+| `Componente de portal` | colección | `/api/componentes-portal` | Tarjetas del portal privado, con interruptor de activo |
+| `Solicitud PQRSF` | colección | `/api/solicitudes-pqrsf` | Casos radicados por el asistente (solo escritura pública) |
 
 Componentes reutilizables en `apps/cms/src/components/`: `shared.enlace`, `shared.seo`,
 `shared.certificacion`, `nav.columna`, `home.cifra`, `home.mensaje-valor`,
@@ -80,6 +83,36 @@ fechas se formatean según el idioma (`es-CO` / `en-US`).
 
 El microcopy que no es contenido editorial (cabeceras de tabla, «Conocer más», etiquetas
 ARIA) vive en `apps/web/src/data/ui.ts`, no en el CMS.
+
+### Rutas del front
+
+| Ruta | Qué hay |
+|---|---|
+| `/` | Portada pública |
+| `/acceso` | Inicio de sesión y registro (Strapi users-permissions) |
+| `/portal` | Portal privado con los componentes activos del CMS |
+| `/pqrsf` | Asistente de PQRSF que radica el caso en el CMS |
+
+### Interruptores desde el panel
+
+- **Plataforma → `activa`**: la apaga en la portada sin borrarla.
+- **Plataforma → `requiereSesion`**: decide si «Acceder» lleva al login o al portal.
+- **Componente de portal → `activo` / `requiereSesion`**: enciende cada tarjeta del
+  portal y decide si se muestra bloqueada a quien no ha entrado.
+
+En la demo vienen apagadas a propósito la plataforma *Administración de programas* y el
+componente *Simulador de garantías*, para poder encenderlos en vivo.
+
+### Asistente PQRSF
+
+Motor local basado en reglas (`apps/web/src/lib/asistente-pqrsf.ts`): clasifica el tipo
+de solicitud por palabras clave, conduce la conversación y radica el caso con un número
+`BMC-AAAAMMDD-XXXX`, guardando la transcripción completa. **No hay llamadas externas ni
+claves de API.** La interfaz `MotorAsistente` es el punto de extensión para enchufar un
+modelo real detrás de un proxy en Strapi.
+
+El guion de la conversación se edita en **Textos de interfaz → guionPqrsf**, así que el
+cliente puede reescribir lo que dice el asistente sin tocar código.
 
 ### Panel preparado para editores
 
@@ -124,6 +157,13 @@ contenido local.
   `http://localhost:1337`).
 - **Desactivar el seed:** `SEED_DISABLED=true` en `apps/cms/.env`.
 - Los `.env` no se versionan; cada app tiene su `.env.example`.
+
+## Qué no viene del CMS (a propósito)
+
+- El widget *Mis trámites* del portal usa datos de ejemplo fijos: representan registros
+  por usuario que en producción vendrían del sistema transaccional, no de un CMS.
+- `apps/web/src/data/ui.ts` y `site.ts` ya no son fuente de contenido: quedan solo como
+  respaldo para que la web siga en pie si Strapi no responde.
 
 ## Siguientes pasos naturales
 
