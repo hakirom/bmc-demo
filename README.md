@@ -179,19 +179,54 @@ vacío y el asistente no puede radicar.
 
 ### El CMS no va en Vercel
 
-Strapi es un servidor Node persistente con base de datos; Vercel ejecuta funciones
-efímeras con el disco en solo lectura, así que el SQLite se perdería entre invocaciones.
-Opciones que sí funcionan:
+Strapi es un servidor Koa de larga vida con base de datos y escritura en disco. Vercel
+ejecuta funciones efímeras, de arranque en frío y sistema de archivos de solo lectura:
+el SQLite se perdería y cada petición pagaría el arranque completo del CMS. Vercel
+tampoco figura entre los destinos soportados por Strapi. **Despliegue el CMS aparte.**
 
-| Dónde | Notas |
-|---|---|
-| **Strapi Cloud** | Camino oficial: Postgres, CDN y correo incluidos |
-| **Render / Railway / Fly.io** | Contenedor Node + Postgres gestionado |
-| **VPS propio** | Docker o PM2 detrás de Nginx |
+El repositorio ya trae lo necesario: `apps/cms/Dockerfile`, `render.yaml`,
+`apps/cms/.env.production.example` y CORS por variable de entorno.
 
-En cualquiera de ellos hay que cambiar `DATABASE_CLIENT` a `postgres` en `apps/cms/.env`
-(SQLite no sirve con disco efímero) y añadir el dominio del front a la configuración de
-CORS en `apps/cms/config/middlewares.ts`.
+#### Opción A — Render (gratis, un solo clic)
+
+1. Render → **New → Blueprint** → seleccionar este repositorio. Lee `render.yaml` y crea
+   el servicio web más un Postgres gratuito, con todos los secretos generados solos.
+2. Cuando termine, copiar la URL del servicio (`https://bmc-cms.onrender.com`).
+3. En el servicio → **Environment**, poner `FRONTEND_URLS` con el dominio de Vercel.
+4. Abrir `https://bmc-cms.onrender.com/admin` y crear el usuario administrador. El seed
+   ya habrá cargado el contenido y los permisos públicos.
+
+> El plan gratuito de Render duerme el servicio tras 15 minutos de inactividad: la
+> primera petición tarda unos 30 segundos. Para una demo en vivo, despiértelo antes.
+
+#### Opción B — Strapi Cloud (camino oficial, de pago tras la prueba)
+
+1. `cd apps/cms && npx strapi deploy` (pide iniciar sesión en Strapi Cloud).
+2. Postgres, CDN y correo van incluidos; no hay que configurar base de datos.
+3. Añadir `FRONTEND_URLS` en las variables del proyecto.
+
+#### Opción C — Cualquier VPS o contenedor
+
+`apps/cms/Dockerfile` funciona en Railway, Fly.io o Docker sobre un VPS. Variables
+mínimas: las de `apps/cms/.env.production.example`, con `DATABASE_URL` o las variables
+sueltas de Postgres.
+
+### Después de desplegar el CMS
+
+En Vercel → **Settings → Environment Variables**:
+
+```
+VITE_CMS_URL = https://bmc-cms.onrender.com
+```
+
+Y **volver a desplegar**: Vite incrusta esa variable al compilar, no la lee en tiempo de
+ejecución. Sin ella el front apunta a `localhost:1337` y cae al contenido de respaldo.
+
+Comprobación rápida de que quedó bien:
+
+```bash
+curl -s "https://bmc-cms.onrender.com/api/plataformas?locale=es" | head -c 200
+```
 
 ## Qué no viene del CMS (a propósito)
 
