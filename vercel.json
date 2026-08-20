@@ -1,9 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "//": "Solo se usa si el proyecto de Vercel tiene Root Directory en la raíz del repo. Lo recomendado es fijar Root Directory = apps/web, y entonces manda apps/web/vercel.json.",
   "installCommand": "npm --prefix apps/web install",
   "buildCommand": "npm --prefix apps/web run build",
   "outputDirectory": "apps/web/dist",
   "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
