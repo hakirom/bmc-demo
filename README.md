@@ -216,6 +216,23 @@ El repositorio ya trae lo necesario: `apps/cms/Dockerfile`, `render.yaml`,
 mínimas: las de `apps/cms/.env.production.example`, con `DATABASE_URL` o las variables
 sueltas de Postgres.
 
+#### Opción D — Vercel (experimental, no recomendado)
+
+El repositorio incluye `apps/cms/api/index.ts` (arranca Strapi y delega en el callback de
+Koa) y `apps/cms/vercel.json`. Cree un **segundo proyecto** en Vercel sobre el mismo
+repositorio con **Root Directory = `apps/cms`** y defina las variables de
+`apps/cms/.env.production.example`.
+
+Limitaciones que asume al elegir este camino:
+
+- **Arranque en frío**: Strapi tarda segundos en cargar y eso ocurre en cada instancia
+  nueva. El primer acceso al panel puede expirar.
+- **`bootstrap` repetido**: el seed se ejecuta en cada arranque en frío. Es idempotente,
+  pero añade consultas y latencia. Ponga `SEED_DISABLED=true` cuando el contenido ya esté.
+- **Disco de solo lectura**: la subida de archivos necesita un proveedor externo
+  (Cloudinary o S3); el proveedor local no sirve.
+- **Sin soporte oficial** de Strapi para serverless.
+
 ### Después de desplegar el CMS
 
 En Vercel → **Settings → Environment Variables**:
