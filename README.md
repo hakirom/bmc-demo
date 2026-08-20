@@ -162,9 +162,14 @@ contenido local.
 
 ### El front en Vercel
 
-El `vercel.json` de la raíz ya deja el proyecto listo: instala y compila solo
-`apps/web`, publica `apps/web/dist` y reescribe todas las rutas a `index.html` (necesario
+En **Settings → General → Root Directory** ponga `apps/web`. Con eso Vercel detecta Vite
+solo y usa `apps/web/vercel.json`, que reescribe todas las rutas a `index.html` (necesario
 para que `/acceso`, `/portal` y `/pqrsf` funcionen al recargar).
+
+> Hay un `vercel.json` también en la raíz, por si prefiere dejar el Root Directory en la
+> raíz del repositorio. **No combine los dos ajustes**: si el Root Directory es `apps/web`
+> y se aplicara el de la raíz, sus comandos `--prefix apps/web` se resolverían dos veces
+> (`apps/web/apps/web`) y la instalación falla con ENOENT.
 
 En **Settings → Environment Variables** define:
 
